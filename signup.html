@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign up - StudyMate</title>
+<link rel="stylesheet" href="css/st.css">
+</head>
+<body>
+<header class="hd"><span class="lg">StudyMate</span></header>
+<main class="wr nr">
+  <div class="bx">
+    <h1>Create an account</h1>
+    <p class="sm">Only university emails ending with <b id="dm"></b> can register.</p>
+    <form id="fm" novalidate>
+      <label for="nm">Full name</label>
+      <input id="nm" type="text" maxlength="50">
+      <label for="em">University email</label>
+      <input id="em" type="email" autocomplete="username">
+      <label for="pw">Password (6 characters or more)</label>
+      <input id="pw" type="password" autocomplete="new-password">
+      <div id="ms" class="ms"></div>
+      <button id="bt" class="bt" type="submit">Sign up</button>
+    </form>
+    <p class="sm">Already have an account? <a href="index.html">Log in</a></p>
+  </div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/cfg.js"></script>
+<script src="js/ap.js"></script>
+<script src="js/su.js"></script>
+</body>
+</html>

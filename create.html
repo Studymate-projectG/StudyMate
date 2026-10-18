@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create group - StudyMate</title>
+<link rel="stylesheet" href="css/st.css">
+</head>
+<body>
+<header class="hd">
+  <a class="lg" href="groups.html">StudyMate</a>
+  <nav id="nv">
+    <a href="groups.html">Groups</a>
+    <a href="create.html">Create group</a>
+    <a href="profile.html">My profile</a>
+    <a href="#" onclick="lo(); return false;">Log out</a>
+  </nav>
+</header>
+<main class="wr nr">
+  <div class="bx">
+    <h1>Create a study group</h1>
+    <div id="np" class="nt" style="display:none">You need to add your courses first. <a href="profile.html">Go to my profile</a></div>
+    <form id="fm" novalidate style="display:none">
+      <label for="tt">Group title</label>
+      <input id="tt" type="text" maxlength="60" placeholder="e.g. Midterm revision">
+      <label for="co">Course</label>
+      <select id="co"><option value="">Choose a course</option></select>
+      <label for="ds">Short description (optional)</label>
+      <textarea id="ds" maxlength="200" rows="3"></textarea>
+      <label for="mx">Maximum members</label>
+      <input id="mx" type="number" min="2" value="4">
+      <label for="tm">Meeting time</label>
+      <input id="tm" type="datetime-local">
+      <div id="ms" class="ms"></div>
+      <button id="bt" class="bt" type="submit">Create group</button>
+    </form>
+  </div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/cfg.js"></script>
+<script src="js/cr.js"></script>
+<script src="js/ap.js"></script>
+<script src="js/cg.js"></script>
+</body>
+</html>

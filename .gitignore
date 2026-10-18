@@ -1,0 +1,5 @@
+*.log
+results.json
+shots/
+.firebase/
+node_modules/

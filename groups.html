@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study groups - StudyMate</title>
+<link rel="stylesheet" href="css/st.css">
+</head>
+<body>
+<header class="hd">
+  <a class="lg" href="groups.html">StudyMate</a>
+  <nav id="nv">
+    <a href="groups.html">Groups</a>
+    <a href="create.html">Create group</a>
+    <a href="profile.html">My profile</a>
+    <a href="#" onclick="lo(); return false;">Log out</a>
+  </nav>
+</header>
+<main class="wr">
+  <div class="tp">
+    <h1>Study groups</h1>
+    <a class="bt" href="create.html">+ Create group</a>
+  </div>
+  <div class="fb">
+    <label for="fl">Course</label>
+    <select id="fl"><option value="">All courses</option></select>
+  </div>
+  <div id="ms" class="ms"></div>
+  <p id="ld" class="sm">Loading groups...</p>
+  <p id="nt" class="nt"></p>
+  <div id="ls" class="gr"></div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/cfg.js"></script>
+<script src="js/cr.js"></script>
+<script src="js/ap.js"></script>
+<script src="js/gl.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My profile - StudyMate</title>
+<link rel="stylesheet" href="css/st.css">
+</head>
+<body>
+<header class="hd">
+  <a class="lg" href="groups.html">StudyMate</a>
+  <nav id="nv">
+    <a href="groups.html">Groups</a>
+    <a href="create.html">Create group</a>
+    <a href="profile.html">My profile</a>
+    <a href="#" onclick="lo(); return false;">Log out</a>
+  </nav>
+</header>
+<main class="wr nr">
+  <div class="bx">
+    <h1>My profile</h1>
+    <p class="sm" id="em"></p>
+    <div id="ms" class="ms"></div>
+    <form id="fm" novalidate style="display:none">
+      <label for="nm">Full name</label>
+      <input id="nm" type="text" maxlength="50">
+      <label for="mj">Major</label>
+      <input id="mj" type="text" maxlength="50" placeholder="e.g. Computer Science">
+      <label>My courses this term</label>
+      <div id="cs" class="cl"></div>
+      <button id="bt" class="bt" type="submit">Save profile</button>
+    </form>
+  </div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/cfg.js"></script>
+<script src="js/cr.js"></script>
+<script src="js/ap.js"></script>
+<script src="js/pf.js"></script>
+</body>
+</html>
