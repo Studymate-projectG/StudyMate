@@ -11,18 +11,20 @@
   <a class="lg" href="groups.html">StudyMate</a>
   <nav id="nv">
     <a href="groups.html">Groups</a>
+    <a href="mine.html">My groups</a>
     <a href="create.html">Create group</a>
     <a href="profile.html">My profile</a>
     <a href="#" onclick="lo(); return false;">Log out</a>
   </nav>
 </header>
-<main class="wr nr">
+<main class="wr">
   <p><a href="groups.html">&larr; Back to groups</a></p>
   <div id="ms" class="ms"></div>
   <div id="bx" class="bx" style="display:none">
-    <span id="tg" class="tg"></span>
+    <span id="tg" class="tg"></span> <span id="cl" class="cls"></span>
     <h1 id="tt"></h1>
     <p id="ds"></p>
+    <div id="rm" class="rem" style="display:none"></div>
     <table class="tb">
       <tr><th>Meeting time</th><td id="tm"></td></tr>
       <tr><th>Leader</th><td id="ln"></td></tr>
@@ -30,7 +32,21 @@
       <tr><th>Seats</th><td id="st"></td></tr>
     </table>
     <p id="in" class="in"></p>
-    <button id="bt" class="bt" style="display:none">Join group</button>
+    <div class="ac">
+      <button id="bt" class="bt" style="display:none">Join group</button>
+      <button id="lv" class="bt sg" style="display:none">Leave group</button>
+      <a id="ed" class="bt sc" style="display:none">Edit group</a>
+      <button id="cs" class="bt sg" style="display:none">Close group</button>
+    </div>
+    <h3>Members</h3>
+    <div id="mb" class="mb"></div>
+    <h3>Announcements</h3>
+    <div id="an" class="an"></div>
+    <div id="nf" style="display:none">
+      <label for="nt2">New announcement (300 characters maximum)</label>
+      <textarea id="nt2" maxlength="300" rows="2"></textarea>
+      <button id="ab" class="bt">Post announcement</button>
+    </div>
   </div>
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>

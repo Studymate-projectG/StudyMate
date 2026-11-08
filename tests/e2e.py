@@ -1,9 +1,13 @@
 import json, re, sys, time, urllib.request
+from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
 
 BU = "http://localhost:5000"
 PJ = "demo-studymate"
 SH = sys.argv[1] if len(sys.argv) > 1 else "shots"
+
+def dt(d, h=18, m=0):
+    return (datetime.now() + timedelta(days=d)).strftime("%Y-%m-%dT%H:%M")
 rs = []
 er = []
 nw = []
@@ -148,25 +152,25 @@ with sync_playwright() as pw:
     sv = [i.get_attribute("value") for i in p.query_selector_all("#cs input:checked")]
     ck("TC-13", "US2", "Editing the profile saves the new major and courses", p.input_value("#mj") == "Software Engineering" and sorted(sv) == ["CS 361", "CS 388T"], f"courses: {sv}")
 
-    cg(p, "", "CS 388T", "", 4, "2026-10-20T18:00"); t = ms(p)
+    cg(p, "", "CS 388T", "", 4, dt(2)); t = ms(p)
     ck("TC-14", "US3", "Group is not created when the title is empty", "group title" in t, t)
     sc(p, "06_create_empty_title")
-    cg(p, "Sprint review prep", "", "", 4, "2026-10-20T18:00"); t = ms(p)
+    cg(p, "Sprint review prep", "", "", 4, dt(2)); t = ms(p)
     ck("TC-15", "US3", "Group is not created when no course is chosen", "choose a course" in t, t)
     cg(p, "Sprint review prep", "CS 388T", "", 4, ""); t = ms(p)
     ck("TC-16", "US3", "Group is not created when the meeting time is empty", "meeting time" in t, t)
-    cg(p, "Sprint review prep", "CS 388T", "", 1, "2026-10-20T18:00"); t = ms(p)
+    cg(p, "Sprint review prep", "CS 388T", "", 1, dt(2)); t = ms(p)
     ck("TC-17", "US3", "Group is not created when maximum members is 1", "greater than 1" in t, t)
     sc(p, "07_create_max_one")
     n = len(json.loads(urllib.request.urlopen(urllib.request.Request(f"http://localhost:8080/v1/projects/{PJ}/databases/(default)/documents/groups", headers={"Authorization": "Bearer owner"})).read()).get("documents", []))
     ck("TC-18", "US3", "No group was saved by the four wrong tries above", n == 0, f"groups in database: {n}")
 
-    cg(p, "Agile midterm revision", "CS 388T", "We revise the Scrum chapters together.", 3, "2026-10-20T18:00")
+    cg(p, "Agile midterm revision", "CS 388T", "We revise the Scrum chapters together.", 3, dt(2))
     p.wait_for_url("**/groups.html*"); p.wait_for_selector("#ld", state="hidden")
     tt = [h.inner_text() for h in p.query_selector_all(".cd h3")]
     ck("TC-19", "US3", "New group appears in the groups list right after it is created", "Agile midterm revision" in tt and "created" in p.inner_text("#ms"))
     sc(p, "08_group_created")
-    cg(p, "Web project help", "CS 361", "", 2, "2026-10-19T16:30")
+    cg(p, "Web project help", "CS 361", "", 2, dt(1, 16, 30))
     p.wait_for_url("**/groups.html*")
 
     c2, q = pg(br)
@@ -175,7 +179,7 @@ with sync_playwright() as pw:
     go(q, "create.html"); q.wait_for_selector("#np", state="visible")
     ck("TC-20", "US3", "A student with no courses is asked to add her courses before creating a group", "add your courses first" in q.inner_text("#np"))
     pf(q, "Information Systems", ["CS 281", "CS 388T", "CS 361"])
-    cg(q, "Database quiz practice", "CS 281", "SQL questions", 5, "2026-10-21T10:00")
+    cg(q, "Database quiz practice", "CS 281", "SQL questions", 5, dt(5, 10, 0))
     q.wait_for_url("**/groups.html*")
 
     go(p, "groups.html"); p.wait_for_selector("#ld", state="hidden")

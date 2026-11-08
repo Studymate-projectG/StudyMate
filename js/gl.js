@@ -9,7 +9,7 @@ crs.forEach(c => {
 
 function sh() {
   const c = fl.value;
-  const ls = c ? all.filter(g => g.course == c) : all;
+  const ls = all.filter(g => !g.closed).filter(g => (c ? g.course == c : true));
   const bx = $("ls");
   bx.innerHTML = "";
   $("nt").textContent = "";
@@ -17,22 +17,12 @@ function sh() {
     $("nt").textContent = c ? "There are no study groups for " + c + " yet." : "There are no study groups yet. Be the first to create one!";
     return;
   }
-  ls.forEach(g => {
-    const fr = g.max - g.members.length;
-    const cd = el("div", "cd");
-    cd.appendChild(el("span", "tg", g.course));
-    cd.appendChild(el("h3", null, g.title));
-    cd.appendChild(el("p", "sm", ft(g.time)));
-    cd.appendChild(el("p", fr > 0 ? "st" : "st fu", fr > 0 ? fr + " free seat" + (fr > 1 ? "s" : "") + " of " + g.max : "Full"));
-    const a = el("a", "bt sc", "View group");
-    a.href = "group.html?id=" + g.id;
-    cd.appendChild(a);
-    bx.appendChild(cd);
-  });
+  ls.forEach(g => bx.appendChild(gr(g)));
 }
 
 gd(() => {
   if (new URLSearchParams(location.search).get("new")) ms("Your group was created.", true);
+  rm();
   db.collection("groups").get().then(s => {
     all = s.docs.map(d => ({ id: d.id, ...d.data() }));
     all.sort((a, b) => (a.time > b.time ? 1 : -1));
@@ -45,3 +35,21 @@ gd(() => {
 });
 
 fl.addEventListener("change", sh);
+
+function rm() {
+  db.collection("groups").where("members", "array-contains", au.currentUser.uid).get().then(s => {
+    const ls = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(g => isopen(g) && rmsg(g));
+    const b = $("rm");
+    b.innerHTML = "";
+    ls.sort((a, c) => (a.time > c.time ? 1 : -1)).forEach(g => {
+      const r = el("div", "rem");
+      r.appendChild(el("b", null, "Reminder - " + cn(g.course) + ": " + g.title));
+      r.appendChild(el("p", null, rmsg(g)));
+      const a = el("a", null, "Open group");
+      a.href = "group.html?id=" + g.id;
+      r.appendChild(a);
+      b.appendChild(r);
+    });
+    b.style.display = ls.length ? "block" : "none";
+  });
+}

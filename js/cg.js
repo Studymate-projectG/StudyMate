@@ -30,6 +30,7 @@ $("fm").addEventListener("submit", e => {
   if (!tt) return ms("Please enter a group title.");
   if (!co) return ms("Please choose a course.");
   if (!tm) return ms("Please choose the meeting time.");
+  if (tm <= now()) return ms("The meeting time is in the past. Please choose a future date and time.");
   if (!Number.isInteger(mx) || mx < 2) return ms("Maximum members must be a whole number greater than 1.");
   $("bt").disabled = true;
   db.collection("groups").add({
@@ -38,14 +39,17 @@ $("fm").addEventListener("submit", e => {
     desc: ds,
     max: mx,
     time: tm,
+    t: new Date(tm).getTime(),
     leader: me.uid,
     leaderName: pr.name || me.email,
     members: [me.uid],
+    closed: false,
     created: firebase.firestore.FieldValue.serverTimestamp()
   })
     .then(() => (location.href = "groups.html?new=1"))
-    .catch(() => {
+    .catch(e => {
       $("bt").disabled = false;
-      ms("Could not create the group. Please try again.");
+      if (e.code == "permission-denied") ms("The meeting time is in the past. Please choose a future date and time.");
+      else ms("Could not create the group. Please try again.");
     });
 });

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit group - StudyMate</title>
+<link rel="stylesheet" href="css/st.css">
+</head>
+<body>
+<header class="hd">
+  <a class="lg" href="groups.html">StudyMate</a>
+  <nav id="nv">
+    <a href="groups.html">Groups</a>
+    <a href="mine.html">My groups</a>
+    <a href="create.html">Create group</a>
+    <a href="profile.html">My profile</a>
+    <a href="#" onclick="lo(); return false;">Log out</a>
+  </nav>
+</header>
+<main class="wr nr">
+  <p><a id="bk" href="groups.html">&larr; Back to the group</a></p>
+  <div class="bx">
+    <h1>Edit group</h1>
+    <div id="np" class="nt" style="display:none">Only the leader of the group can edit it.</div>
+    <form id="fm" novalidate style="display:none">
+      <label for="tt">Group title</label>
+      <input id="tt" type="text" maxlength="60">
+      <label for="co">Course</label>
+      <select id="co" disabled></select>
+      <label for="ds">Short description (optional)</label>
+      <textarea id="ds" maxlength="200" rows="3"></textarea>
+      <label for="mx">Maximum members (current members: <span id="ct">1</span>)</label>
+      <input id="mx" type="number" min="2">
+      <label for="tm">Meeting time</label>
+      <input id="tm" type="datetime-local">
+      <div id="ms" class="ms"></div>
+      <button id="bt" class="bt" type="submit">Save changes</button>
+    </form>
+  </div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/cfg.js"></script>
+<script src="js/cr.js"></script>
+<script src="js/ap.js"></script>
+<script src="js/ed.js"></script>
+</body>
+</html>

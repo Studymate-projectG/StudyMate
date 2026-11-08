@@ -7,6 +7,6 @@ const cfg = {
   appId: "1:000000000000:web:0000000000000000"
 };
 
-const emu = location.hostname == "localhost" || location.hostname == "127.0.0.1";
+const emu = ["localhost", "127.0.0.1"].includes(location.hostname) || location.port == "5000";
 
 const dom = "@university.edu.sa";

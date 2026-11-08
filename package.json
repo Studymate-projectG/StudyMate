@@ -1,0 +1,16 @@
+{
+  "name": "studymate",
+  "version": "3.0.0",
+  "private": true,
+  "description": "StudyMate study group web app (CS 388T, Phase 3)",
+  "scripts": {
+    "emulators": "firebase emulators:start --project demo-studymate --only auth,firestore,hosting",
+    "test:rules": "node tests/rules.test.mjs",
+    "test:e2e": "python3 tests/e2e.py shots",
+    "test:p3": "python3 tests/p3.py shots"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "3.0.4",
+    "firebase": "10.12.2"
+  }
+}

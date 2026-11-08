@@ -3,3 +3,4 @@ results.json
 shots/
 .firebase/
 node_modules/
+__pycache__/
