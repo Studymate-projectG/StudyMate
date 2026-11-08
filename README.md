@@ -6,6 +6,10 @@ It is built with HTML, CSS, JavaScript and Firebase (Authentication + Cloud Fire
 CS 388T - Agile Software Development, Section 7C6.
 Team: Haneen Aljumah (445008652), Noha Alqahtani (445008650), Moudhi Aldakhil (445008789), Renad Al-aqili (445008840).
 
+## Repository
+
+https://github.com/Studymate-projectG/StudyMate (branch `main`)
+
 ## Features
 
 Sprint 1 (US1 to US5):
@@ -144,6 +148,6 @@ They are written to `../Evidence/Screenshots` (the folder path can be changed wi
 - The session reminder is inside the app only. Push notifications and email notifications are not part of this sprint;
   they need a notification service and they are written as item 22 in the Product Backlog.
 - The application was tested on the Firebase Emulator with the demo configuration; it has not been deployed to a real
-  Firebase project.
+  Firebase project (no production Firebase project is used in this course).
 - Closed groups are not deleted. They stay in the database with `closed: true` and hidden from the lists, so the leader
   can still open the group page from My Groups.
