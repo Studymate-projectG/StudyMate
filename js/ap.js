@@ -76,11 +76,16 @@ function isopen(g) {
   return !g.closed && g.time > now();
 }
 
+// The date and time fields (datetime-local) use the local time of the student,
+// so the value is built in the local time too and not in UTC.
+function local(d) {
+  const p = n => (n < 10 ? "0" : "") + n;
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate())
+    + "T" + p(d.getHours()) + ":" + p(d.getMinutes());
+}
+
 function now() {
-  const d = new Date();
-  d.setSeconds(0);
-  d.setMilliseconds(0);
-  return d.toISOString().slice(0, 16);
+  return local(new Date());
 }
 
 function free(g) {
