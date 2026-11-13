@@ -38,6 +38,10 @@ const N = env.authenticatedContext("N", { email: "other@university.edu.sa" }).fi
 const X = env.authenticatedContext("X", { email: "outsider@gmail.com" }).firestore();
 
 async function seed() {
+  // Release the listeners and the cached documents of the previous case before the
+  // next one: without this the emulator keeps every context open and the test machine
+  // runs out of memory near the end of the suite.
+  await env.clearFirestore();
   await env.withSecurityRulesDisabled(async c => {
     const db = c.firestore();
     await setDoc(doc(db, "groups/g1"), base({ id: "g1", members: ["L", "M"] }));
