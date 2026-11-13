@@ -9,7 +9,8 @@ crs.forEach(c => {
 
 function sh() {
   const c = fl.value;
-  const ls = all.filter(g => !g.closed).filter(g => (c ? g.course == c : true));
+  // A group whose session time already passed is not shown: nobody can join it.
+  const ls = all.filter(g => !g.closed && g.time > now()).filter(g => (c ? g.course == c : true));
   const bx = $("ls");
   bx.innerHTML = "";
   $("nt").textContent = "";
