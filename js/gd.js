@@ -15,7 +15,7 @@ function sh(d) {
   $("tm").textContent = ft(g.time);
   $("ln").textContent = g.leaderName;
   $("mc").textContent = g.members.length;
-  $("st").textContent = g.closed ? "Closed group" : fr > 0 ? fr + " of " + g.max + " seats free" : "Full (" + g.max + " of " + g.max + ")";
+  $("st").textContent = g.closed ? "Closed group" : g.time <= now() ? "Session passed" : fr > 0 ? fr + " of " + g.max + " seats free" : "Full (" + g.max + " of " + g.max + ")";
   $("bt").style.display = "none";
   $("lv").style.display = "none";
   $("ed").style.display = "none";
@@ -25,9 +25,10 @@ function sh(d) {
   if (il) $("in").textContent = "You are the leader of this group.";
   else if (im) $("in").textContent = "You are a member of this group.";
   else if (g.closed) $("in").textContent = "This group is closed.";
+  else if (g.time <= now()) $("in").textContent = "The session of this group already passed.";
   else if (fr <= 0) $("in").textContent = "This group is full.";
   else $("bt").style.display = "inline-block";
-  if (im && !il && !g.closed) $("lv").style.display = "inline-block";
+  if (im && !il && !g.closed && g.time > now()) $("lv").style.display = "inline-block";
   if (il && !g.closed) {
     $("ed").style.display = "inline-block";
     $("ed").href = "edit.html?id=" + id;
