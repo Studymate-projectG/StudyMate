@@ -52,9 +52,9 @@ because the approval process is not defined yet, and item 19 (reset the password
 | firestore.rules | Firebase security rules |
 | firebase.json, .firebaserc | Emulator and hosting settings |
 | tests/e2e.py | Sprint 1 acceptance and regression tests (34 checks) |
-| tests/p3.py | Sprint 2 tests (54 checks) |
+| tests/p3.py | Sprint 2 tests (58 checks) |
 | tests/full_flow.py | The 13-step journey test (15 checks) |
-| tests/rules.test.mjs | Firestore security rules tests (36 checks) |
+| tests/rules.test.mjs | Firestore security rules tests (49 checks) |
 | tests/evidence_chrome.py | Chrome screenshots of every story |
 | tests/evidence_vscode_term.py | Screenshots of the editor and the test terminal |
 | tests/demo.sh | Runs the four suites in order |
@@ -124,12 +124,12 @@ bash tests/demo.sh
 
 | Suite | File | Checks |
 |-------|------|--------|
-| Firestore security rules (Emulator) | tests/rules.test.mjs | 36 |
+| Firestore security rules (Emulator) | tests/rules.test.mjs | 49 |
 | Sprint 1 regression tests (Chrome) | tests/e2e.py | 34 |
-| Sprint 2 tests | tests/p3.py | 54 |
+| Sprint 2 tests | tests/p3.py | 58 |
 | Full journey (13 steps) | tests/full_flow.py | 15 |
 
-The last run on 8 November 2026 passed 139 of 139 checks. The log of that run is in `Evidence/Test_Logs/run_all.log`.
+The final test suite includes 156 checks (49 security rules, 34 Sprint 1 regression, 58 Sprint 2, and 15 full-journey checks). The earlier 8 November run of 139 checks is archived in `Evidence/Test_Logs/run_all.log`.
 
 If the rules test cannot reach the emulator from your terminal, run it with the address of the emulator
 (for example `FSHOST=127.0.0.1 node tests/rules.test.mjs`).
