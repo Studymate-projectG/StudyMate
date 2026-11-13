@@ -34,9 +34,17 @@ def pg(br, w=1280, h=800):
 def iz(p):
     return re.search(r"/(index\.html)?$", p.url) is not None and p.query_selector("h1").inner_text() == "Log in"
 
-def go(p, u):
-    p.goto(BU + "/" + u)
-    p.wait_for_load_state("load")
+def go(p, u, tries=3):
+    # The page is retried when the emulator is slow: a slow load is not a product bug.
+    for i in range(tries):
+        try:
+            p.goto(BU + "/" + u, timeout=45000)
+            p.wait_for_load_state("load", timeout=45000)
+            return
+        except Exception:
+            if i == tries - 1:
+                raise
+            p.wait_for_timeout(2000)
 
 def ms(p):
     p.wait_for_selector("#ms.er, #ms.ok", timeout=25000)
@@ -85,7 +93,7 @@ def sc(p, n, fp=False):
 
 rd()
 with sync_playwright() as pw:
-    br = pw.chromium.launch()
+    br = pw.chromium.launch(args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--disable-extensions", "--js-flags=--max-old-space-size=256"])
     c1, p = pg(br)
 
     go(p, "groups.html")
@@ -281,4 +289,6 @@ with sync_playwright() as pw:
 er2 = [e for e in er if "permission" not in e.lower() and "PERMISSION_DENIED" not in e]
 ck("TC-34", "DoD", "No JavaScript errors in the browser console during all tests", not er2, f"{len(er2)} JS errors; {len(nw)} expected 400/403 network messages from the refused login, sign up and rule tests")
 json.dump({"results": rs, "js_errors": er2, "all_console_errors": er, "network_msgs": nw}, open(f"{SH}/../results.json", "w"), indent=1)
-print(sum(r["result"] == "Pass" for r in rs), "/", len(rs), "passed")
+_ok = sum(r["result"] == "Pass" for r in rs)
+print(_ok, "/", len(rs), "passed")
+sys.exit(0 if _ok == len(rs) and _ok > 0 else 1)
