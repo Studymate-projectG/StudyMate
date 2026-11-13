@@ -35,7 +35,6 @@ service cloud.firestore {
         && after().time is string && after().time.size() >= 16
         && after().t is int && after().t > request.time.toMillis();
     }
-
     function same() {
       return after().title == resource.data.title
         && after().course == resource.data.course
@@ -71,14 +70,16 @@ service cloud.firestore {
           && request.auth.uid in after().members
           && after().members.size() == resource.data.members.size() + 1
           && after().members.size() <= resource.data.max
-          && !resource.data.closed)
+          && !resource.data.closed
+          && resource.data.t > request.time.toMillis())
         ||
         (member() && resource.data.leader != request.auth.uid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
           && request.auth.uid in resource.data.members
           && !(request.auth.uid in after().members)
           && resource.data.leader in after().members
-          && after().members.size() == resource.data.members.size() - 1)
+          && after().members.size() == resource.data.members.size() - 1
+          && after().members == resource.data.members.removeAll([request.auth.uid]))
         ||
         (leader()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields())
@@ -87,13 +88,16 @@ service cloud.firestore {
         ||
         (leader()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['closed'])
-          && after().closed is bool)
+          && after().closed is bool
+          && after().closed == !resource.data.closed
+          && after().closed == true)
         ||
         (leader()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
           && resource.data.members.hasAll(after().members)
           && request.auth.uid in after().members
-          && after().members.size() < resource.data.members.size())
+          && after().members.size() < resource.data.members.size()
+          && after().members.size() == resource.data.members.size() - 1)
       );
 
       match /notes/{nid} {
