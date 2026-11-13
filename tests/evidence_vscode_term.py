@@ -23,6 +23,19 @@ with sync_playwright() as pw:
     p.wait_for_selector(".monaco-workbench", timeout=120000)
     time.sleep(8)
 
+    # close a dialog that code-server shows on the first visit (for example "Sign in")
+    for _ in range(3):
+        try:
+            p.keyboard.press("Escape")
+            time.sleep(1)
+        except Exception:
+            pass
+    try:
+        p.locator(".monaco-dialog-box .monaco-button").first.click(timeout=3000)
+        time.sleep(1)
+    except Exception:
+        pass
+
     # close the welcome tab if it is there
     try:
         p.locator(".tabs-container .tab:has-text('Welcome') .codicon-close").first.click(timeout=5000)
@@ -30,12 +43,14 @@ with sync_playwright() as pw:
         pass
     time.sleep(1)
 
-    # open the code file in the editor
-    try:
-        p.locator(".monaco-list-row:has-text('%s')" % FILE).first.click(timeout=8000)
-        time.sleep(3)
-    except Exception as e:
-        print("open file failed:", e, flush=True)
+    # open the code file with the keyboard (Ctrl+P), no mouse click on the sidebar
+    p.keyboard.press("Control+P")
+    time.sleep(2)
+    p.keyboard.type(FILE)
+    time.sleep(2)
+    p.keyboard.press("Enter")
+    time.sleep(4)
+    print("opened file:", FILE, flush=True)
 
     # command palette -> create terminal
     p.keyboard.press("F1")

@@ -231,7 +231,7 @@ with sync_playwright() as pw:
 
     c3, w = pg(br)
     su(w, "Nora Test", "nora@university.edu.sa", "pass123")
-    w.wait_for_url("**/profile.html*")
+    w.wait_for_url("**/profile.html*", timeout=60000)
     go(w, "groups.html"); w.wait_for_selector("#ld", state="hidden")
     fu = [c.inner_text() for c in w.query_selector_all(".cd") if "Web project help" in c.inner_text()][0]
     go(w, "group.html?id=" + g2); w.wait_for_selector("#bx", state="visible")
@@ -243,12 +243,12 @@ with sync_playwright() as pw:
     g3 = gid(w, "Database quiz practice")
     c4, x = pg(br)
     su(x, "Hind Test", "hind@university.edu.sa", "pass123")
-    x.wait_for_url("**/profile.html*")
+    x.wait_for_url("**/profile.html*", timeout=60000)
     for i in range(3):
         cz, z = pg(br)
         su(z, f"Extra {i}", f"extra{i}@university.edu.sa", "pass123")
-        z.wait_for_url("**/profile.html*")
-        go(z, "group.html?id=" + g3); z.wait_for_selector("#bx", state="visible")
+        z.wait_for_url("**/profile.html*", timeout=60000)
+        go(z, "group.html?id=" + g3); z.wait_for_selector("#bx", state="visible", timeout=45000)
         z.click("#bt"); ms(z); cz.close()
     go(w, "group.html?id=" + g3); w.wait_for_selector("#bx", state="visible")
     go(x, "group.html?id=" + g3); x.wait_for_selector("#bx", state="visible")
@@ -257,6 +257,7 @@ with sync_playwright() as pw:
     t1 = ms(w); t2 = ms(x); time.sleep(0.5)
     jn = [t1, t2].count("You joined the group.")
     ck("TC-31", "US5", "Two students click join on the last seat at the same time: only one joins", s0.startswith("1 of 5") and jn == 1 and "full now" in (t1 + t2), f"{t1} | {t2}")
+    c4.close()
 
     c5, y = pg(br)
     go(y, "signup.html")

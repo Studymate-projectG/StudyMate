@@ -1,4 +1,4 @@
-import json, sys, time
+import sys, json, time
 from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
 
@@ -18,15 +18,23 @@ def ck(i, nm, ok, nt=""):
 
 
 with sync_playwright() as pw:
-    br = pw.chromium.launch()
+    br = pw.chromium.launch(args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--disable-extensions", "--js-flags=--max-old-space-size=256"])
     ctx = br.new_context(viewport={"width": 1280, "height": 800})
     p = ctx.new_page()
     p.on("pageerror", lambda e: er.append(str(e)))
     p.on("console", lambda m: er.append(m.text) if m.type == "error" and "Failed to load resource" not in m.text else None)
 
-    def go(u):
-        p.goto(BU + "/" + u)
-        p.wait_for_load_state("load")
+    def go(u, tries=3):
+        # The page is retried when the emulator is slow: a slow load is not a product bug.
+        for i in range(tries):
+            try:
+                p.goto(BU + "/" + u, timeout=45000)
+                p.wait_for_load_state("load", timeout=45000)
+                return
+            except Exception:
+                if i == tries - 1:
+                    raise
+                p.wait_for_timeout(2000)
 
     def msg():
         p.wait_for_selector("#ms.er, #ms.ok", timeout=25000)
@@ -215,4 +223,6 @@ with sync_playwright() as pw:
     br.close()
 
 json.dump({"results": rs, "js_errors": er}, open(f"{SH}/../full_flow_results.json", "w"), indent=1)
-print(sum(r["result"] == "Pass" for r in rs), "/", len(rs), "passed")
+_ok = sum(r["result"] == "Pass" for r in rs)
+print(_ok, "/", len(rs), "passed")
+sys.exit(0 if _ok == len(rs) and _ok > 0 else 1)

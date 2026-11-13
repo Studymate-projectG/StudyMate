@@ -38,9 +38,17 @@ def pg(br, w=1280, h=800):
     return c, p
 
 
-def go(p, u):
-    p.goto(BU + "/" + u)
-    p.wait_for_load_state("load")
+def go(p, u, tries=3):
+    # The page is retried when the emulator is slow: a slow load is not a product bug.
+    for i in range(tries):
+        try:
+            p.goto(BU + "/" + u, timeout=45000)
+            p.wait_for_load_state("load", timeout=45000)
+            return
+        except Exception:
+            if i == tries - 1:
+                raise
+            p.wait_for_timeout(2000)
 
 
 def ms(p):
@@ -110,7 +118,7 @@ def new(br, nm, em, courses=("CS 388T", "CS 281")):
 
 
 with sync_playwright() as pw:
-    br = pw.chromium.launch()
+    br = pw.chromium.launch(args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--disable-extensions", "--js-flags=--max-old-space-size=256"])
 
     # ---------- accounts and data ----------
     ca, a = new(br, "Abeer Leader", "abeer@university.edu.sa")
@@ -449,6 +457,10 @@ with sync_playwright() as pw:
        b.is_visible("#rm") and "Algorithms revision" in b.inner_text("#rm"))
 
     # ---------- responsive ----------
+    # The three student contexts are not used any more, so they are closed before the
+    # responsive checks: Chromium keeps about 150 MB for each open page.
+    for ccx in (ca, cb, cc):
+        ccx.close()
     c4, dw = pg(br, 1280, 800)
     go(dw, "index.html")
     d = dw
@@ -487,6 +499,107 @@ with sync_playwright() as pw:
     ck("P3-51", "DoD", "The menu, the buttons and the messages are visible on the phone view",
        m.is_visible("#nv") and m.is_visible("#tt"))
 
+    c5.close()  # the phone context is finished before the time-zone checks start
+
+    # ---------- the time check uses the local time of the student, not UTC ----------
+    # The student in this block lives in Asia/Riyadh (+03:00) while the test machine runs
+    # in UTC, so a value built in UTC is three hours behind her clock.
+    ctz = br.new_context(viewport={"width": 1280, "height": 800}, timezone_id="Asia/Riyadh")
+    t = ctz.new_page()
+    t.set_default_timeout(25000)
+    t.on("pageerror", lambda e: er.append("pageerror: " + str(e)))
+    t.on("console", lambda m: (nw if "Failed to load resource" in m.text else er).append(m.text) if m.type == "error" else None)
+    go(t, "signup.html")
+    t.fill("#nm", "Riyadh Time")
+    t.fill("#em", "riyadh@university.edu.sa")
+    t.fill("#pw", "pass123")
+    t.click("#bt")
+    t.wait_for_url("**/profile.html*")
+    t.wait_for_selector("#fm", state="visible")
+    t.fill("#mj", "Computer Science")
+    for c in t.query_selector_all("#cs input"):
+        if c.get_attribute("value") == "CS 388T":
+            c.click()
+    t.click("#bt")
+    t.wait_for_selector("#ms.ok")
+
+    go(t, "create.html")
+    t.wait_for_selector("#fm", state="visible")
+    loc90 = t.evaluate("() => { const d = new Date(Date.now() + 90 * 60000), p = n => (n < 10 ? '0' : '') + n; return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); }")
+    utc90 = t.evaluate("() => new Date(Date.now() + 90 * 60000).toISOString().slice(0, 16)")
+    t.fill("#tt", "Riyadh time group")
+    t.select_option("#co", "CS 388T")
+    t.fill("#ds", "A meeting time built in the local time of the student.")
+    t.fill("#mx", "4")
+    t.fill("#tm", loc90)
+    t.click("#bt")
+    t.wait_for_url("**/groups.html*")
+    ck("P3-53", "US17", "A future meeting time is accepted in the local time of the student (Asia/Riyadh, machine in UTC)",
+       loc90 != utc90, "local " + loc90 + " / UTC value would be " + utc90)
+
+    go(t, "create.html")
+    t.wait_for_selector("#fm", state="visible")
+    t.fill("#tt", "Riyadh past group")
+    t.select_option("#co", "CS 388T")
+    t.fill("#mx", "4")
+    t.fill("#tm", t.evaluate("() => { const d = new Date(Date.now() + 60 * 60000), p = n => (n < 10 ? \"0\" : \"\") + n; return d.getUTCFullYear() + \"-\" + p(d.getUTCMonth() + 1) + \"-\" + p(d.getUTCDate()) + \"T\" + p(d.getUTCHours()) + \":\" + p(d.getUTCMinutes()); }"))
+    t.click("#bt")
+    t.wait_for_selector("#ms.er, #ms.ok", timeout=25000)
+    m2 = t.inner_text("#ms")
+    ck("P3-54", "US17", "A time that is in the past for the student is refused (UTC value one hour ahead is in her past)",
+       "past" in m2.lower(), m2)
+
+    # ---- a session that already passed is hidden from the list and cannot be joined ----
+    # The group is written with the admin rights of the emulator because the rules refuse
+    # a new group with a past meeting time; this is the data of an old group.
+    uid = t.evaluate("() => au.currentUser.uid")
+    past_time = "2026-11-01T10:00"
+    past_ms = t.evaluate("() => new Date('2026-11-01T10:00').getTime()")
+    body = {"fields": {
+        "title": {"stringValue": "Passed session group"},
+        "course": {"stringValue": "CS 388T"},
+        "desc": {"stringValue": "Session already passed."},
+        "max": {"integerValue": "4"},
+        "time": {"stringValue": past_time},
+        "t": {"integerValue": str(int(past_ms))},
+        "leader": {"stringValue": uid},
+        "leaderName": {"stringValue": "Riyadh Time"},
+        "members": {"arrayValue": {"values": [{"stringValue": uid}]}},
+        "closed": {"booleanValue": False},
+    }}
+    docs = json.loads(rq("POST", f"http://localhost:8080/v1/projects/{PJ}/databases/(default)/documents/groups", body))
+    gidp = docs["name"].split("/")[-1]
+
+    go(t, "groups.html")
+    t.wait_for_selector("#ld", state="hidden")
+    t.wait_for_timeout(900)
+    listed = t.inner_text("#ls")
+    ck("P3-55", "US17", "A group whose session already passed is not shown in the open groups list",
+       "Passed session group" not in listed, "cards shown: " + str(listed.count("View group")))
+
+    # The same browser is used for the second student (an extra context is not created:
+    # the test machine keeps its memory low). She is not the leader of that group, so the
+    # page must tell her that the session passed and must not offer the join button.
+    # Signing out sends the page to the login page, so the destroyed context is expected.
+    try:
+        t.evaluate("() => au.signOut()")
+    except Exception:
+        pass
+    t.wait_for_timeout(1200)
+    go(t, "signup.html")
+    t.fill("#nm", "Late Student")
+    t.fill("#em", "late@university.edu.sa")
+    t.fill("#pw", "pass123")
+    t.click("#bt")
+    t.wait_for_url("**/profile.html*", timeout=60000)
+    go(t, "group.html?id=" + gidp)
+    t.wait_for_selector("#bx", state="visible")
+    t.wait_for_timeout(500)
+    ck("P3-56", "US17", "A student who opens a group whose session already passed sees the message and no join button",
+       "already passed" in t.inner_text("#in") and not t.is_visible("#bt"),
+       t.inner_text("#in") + " | seats: " + t.inner_text("#st"))
+    ctz.close()
+
     er2 = [e for e in er if "permission" not in e.lower() and "PERMISSION_DENIED" not in e]
     ck("P3-52", "DoD", "No JavaScript errors in the Chrome console during the Phase 3 tests", not er2,
        f"{len(er2)} JS errors; {len(nw)} expected network messages from the refused requests")
@@ -497,4 +610,6 @@ with sync_playwright() as pw:
 
 json.dump({"results": rs, "js_errors": er2 if 'er2' in dir() else [], "all_console_errors": er, "network_msgs": nw},
           open(f"{SH}/p3_results_raw.json", "w"), indent=1)
-print(sum(r["result"] == "Pass" for r in rs), "/", len(rs), "passed")
+_ok = sum(r["result"] == "Pass" for r in rs)
+print(_ok, "/", len(rs), "passed")
+sys.exit(0 if _ok == len(rs) and _ok > 0 else 1)
