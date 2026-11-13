@@ -136,6 +136,57 @@ await seed();
 try { await deleteDoc(doc(L, "groups/g1/notes/none")); ck("RS-31", "US9", "Leader", "Announcements cannot be deleted through the client", 0); }
 catch (e) { ck("RS-31", "US9", "Leader", "Announcements cannot be deleted through the client", 1, e.code); }
 
+/* ---------- US10 : leaving cannot touch the other members ---------- */
+await seed();
+try { await updateDoc(doc(M, "groups/g4"), { members: ["L"] }); ck("RS-37", "US10", "Member", "A member leaves and only her own UID is removed", 1); }
+catch (e) { ck("RS-37", "US10", "Member", "A member leaves and only her own UID is removed", 0, e.code); }
+await seed();
+try { await updateDoc(doc(M, "groups/g4"), { members: ["M"] }); ck("RS-38", "US10", "Member", "Leaving cannot remove another member at the same time", 0); }
+catch (e) { ck("RS-38", "US10", "Member", "Leaving cannot remove another member at the same time", 1, e.code); }
+await seed();
+try { await updateDoc(doc(M, "groups/g4"), { members: ["L", "N"] }); ck("RS-39", "US10", "Member", "Leaving cannot add a new student to the group", 0); }
+catch (e) { ck("RS-39", "US10", "Member", "Leaving cannot add a new student to the group", 1, e.code); }
+await seed();
+try { await updateDoc(doc(M, "groups/g4"), { members: ["L", "N", "M"] }); ck("RS-40", "US10", "Member", "Leaving cannot swap her UID for another student", 0); }
+catch (e) { ck("RS-40", "US10", "Member", "Leaving cannot swap her UID for another student", 1, e.code); }
+await seed();
+try { await updateDoc(doc(M, "groups/g4"), { members: ["N"] }); ck("RS-41", "US10", "Member", "Leaving with fewer members and without the leader is refused", 0); }
+catch (e) { ck("RS-41", "US10", "Member", "Leaving with fewer members and without the leader is refused", 1, e.code); }
+
+/* ---------- US8 : the leader removes one member and cannot change the rest ---------- */
+await seed();
+try { await updateDoc(doc(L, "groups/g4"), { members: ["L"] }); ck("RS-42", "US6", "Leader", "The leader removes one member at a time", 1); }
+catch (e) { ck("RS-42", "US6", "Leader", "The leader removes one member at a time", 0, e.code); }
+await seed();
+try { await updateDoc(doc(L, "groups/g4"), { members: ["L", "N"] }); ck("RS-43", "US6", "Leader", "The leader cannot add a student through the members list", 0); }
+catch (e) { ck("RS-43", "US6", "Leader", "The leader cannot add a student through the members list", 1, e.code); }
+await seed();
+try { await updateDoc(doc(L, "groups/g4"), { members: [] }); ck("RS-44", "US6", "Leader", "The leader cannot remove herself from the group", 0); }
+catch (e) { ck("RS-44", "US6", "Leader", "The leader cannot remove herself from the group", 1, e.code); }
+
+/* ---------- US20 : a closed group cannot be reopened in this version ---------- */
+await seed();
+try { await updateDoc(doc(L, "groups/g2"), { closed: false }); ck("RS-45", "US8", "Leader", "A closed group cannot be reopened (US20 is not implemented)", 0); }
+catch (e) { ck("RS-45", "US8", "Leader", "A closed group cannot be reopened (US20 is not implemented)", 1, e.code); }
+await seed();
+try { await updateDoc(doc(L, "groups/g2"), { closed: false, title: "Reopened" }); ck("RS-46", "US8", "Leader", "Reopening a closed group is refused even together with an edit", 0); }
+catch (e) { ck("RS-46", "US8", "Leader", "Reopening a closed group is refused even together with an edit", 1, e.code); }
+await seed();
+await updateDoc(doc(L, "groups/g4"), { closed: true });
+try { await updateDoc(doc(N, "groups/g4"), { members: ["L", "M", "N"] }); ck("RS-47", "US8", "Non-member", "A closed group refuses a new member even when a seat is free", 0); }
+catch (e) { ck("RS-47", "US8", "Non-member", "A closed group refuses a new member even when a seat is free", 1, e.code); }
+
+/* ---------- US17 : a session that already started cannot accept a join ---------- */
+await seed();
+await env.withSecurityRulesDisabled(async c => {
+  const db = c.firestore();
+  await setDoc(doc(db, "groups/g5"), base({ id: "g5", title: "Past session", time: iso(past), t: past, members: ["L"], max: 4 }));
+});
+try { await updateDoc(doc(N, "groups/g5"), { members: ["L", "N"] }); ck("RS-48", "US17", "Non-member", "Joining a group whose session already passed is refused", 0); }
+catch (e) { ck("RS-48", "US17", "Non-member", "Joining a group whose session already passed is refused", 1, e.code); }
+try { await updateDoc(doc(L, "groups/g5"), { title: "Late edit", course: "CS 311", desc: "x", max: 4, time: iso(past), t: past }); ck("RS-49", "US17", "Leader", "A group whose session passed keeps its old meeting time", 0); }
+catch (e) { ck("RS-49", "US17", "Leader", "A group whose session passed keeps its old meeting time", 1, e.code); }
+
 /* ---------- read rules ---------- */
 await seed();
 try { await getDoc(doc(X, "groups/g1")); ck("RS-32", "US1", "Unauthorized", "A non-university account cannot read the groups", 0); }
